@@ -1,6 +1,8 @@
-import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
+import { FinPilotAgent } from './orchestrator.agent';
 
 export class OrchestratorTools {
+  @Widget('orchestrator-plan')
   @Tool({
     name: 'orchestrate_financial_analysis',
     description: 'Coordinates multiple agents (Market Data, Financials, Valuation) to produce a unified analysis of a stock.',

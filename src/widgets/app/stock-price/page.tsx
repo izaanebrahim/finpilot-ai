@@ -19,7 +19,16 @@ export default function StockPriceWidget() {
   if (!isReady || !data) {
     return (
       <div style={{ padding: '32px', textAlign: 'center', color: 'rgba(226, 232, 240, 0.6)', fontFamily: 'system-ui' }}>
-        <div style={{ fontSize: '14px' }}>Loading market data...</div>
+        <div style={{ fontSize: '14px' }}>Fetching market data...</div>
+      </div>
+    );
+  }
+
+  if (data.status === 'error') {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center', color: 'rgb(239, 68, 68)', fontFamily: 'system-ui', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Error fetching stock price</div>
+        <div style={{ fontSize: '14px', marginTop: '8px' }}>{(data as any).error || 'Unknown error occurred'}</div>
       </div>
     );
   }
@@ -33,8 +42,8 @@ export default function StockPriceWidget() {
       borderRadius: '16px',
       border: '1px solid rgba(148, 163, 184, 0.15)',
       boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-      maxWidth: '400px',
-      margin: '0 auto'
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '36px', fontWeight: '800', margin: 0, letterSpacing: '-1px' }}>

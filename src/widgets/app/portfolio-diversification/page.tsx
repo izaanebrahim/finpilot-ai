@@ -35,6 +35,15 @@ export default function PortfolioDiversificationWidget() {
     );
   }
 
+  if (data.status === 'error') {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center', color: 'rgb(239, 68, 68)', fontFamily: 'system-ui', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Error analyzing portfolio</div>
+        <div style={{ fontSize: '14px', marginTop: '8px' }}>{(data as any).error || 'Unknown error occurred'}</div>
+      </div>
+    );
+  }
+
   // Predefined colors for sectors
   const colors = ['59, 130, 246', '16, 185, 129', '139, 92, 246', '245, 158, 11', '236, 72, 153', '6, 182, 212'];
 
@@ -46,9 +55,9 @@ export default function PortfolioDiversificationWidget() {
       color: 'rgb(226, 232, 240)',
       borderRadius: '24px',
       border: '1px solid rgba(148, 163, 184, 0.15)',
-      maxWidth: '800px',
-      margin: '0 auto',
-      boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+      boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>

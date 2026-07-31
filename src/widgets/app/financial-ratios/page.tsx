@@ -26,6 +26,15 @@ export default function FinancialRatiosWidget() {
     );
   }
 
+  if (data.status === 'error') {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center', color: 'rgb(239, 68, 68)', fontFamily: 'system-ui', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Error calculating ratios</div>
+        <div style={{ fontSize: '14px', marginTop: '8px' }}>{(data as any).error || 'Unknown error occurred'}</div>
+      </div>
+    );
+  }
+
   const ratios = data.ratios || {};
 
   const cards = [
@@ -42,8 +51,8 @@ export default function FinancialRatiosWidget() {
       color: 'rgb(226, 232, 240)',
       borderRadius: '16px',
       border: '1px solid rgba(148, 163, 184, 0.15)',
-      maxWidth: '800px',
-      margin: '0 auto'
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>

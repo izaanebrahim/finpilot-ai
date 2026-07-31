@@ -32,6 +32,15 @@ export default function ValuationModelWidget() {
     );
   }
 
+  if (data.status === 'error') {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center', color: 'rgb(239, 68, 68)', fontFamily: 'system-ui', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Error running valuation</div>
+        <div style={{ fontSize: '14px', marginTop: '8px' }}>{(data as any).error || 'Unknown error occurred'}</div>
+      </div>
+    );
+  }
+
   const isBuy = data.recommendation.includes('BUY');
   const accentColor = isBuy ? '16, 185, 129' : '239, 68, 68'; // Emerald for BUY, Red for SELL
 
@@ -43,9 +52,9 @@ export default function ValuationModelWidget() {
       color: 'rgb(226, 232, 240)',
       borderRadius: '24px',
       border: `1px solid rgba(${accentColor}, 0.2)`,
-      maxWidth: '600px',
-      margin: '0 auto',
-      boxShadow: `0 20px 60px rgba(${accentColor}, 0.1)`
+      boxShadow: `0 20px 60px rgba(${accentColor}, 0.1)`,
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>

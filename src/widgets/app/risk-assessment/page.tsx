@@ -26,6 +26,15 @@ export default function RiskAssessmentWidget() {
     );
   }
 
+  if (data.status === 'error') {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center', color: 'rgb(239, 68, 68)', fontFamily: 'system-ui', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Error assessing risk</div>
+        <div style={{ fontSize: '14px', marginTop: '8px' }}>{(data as any).error || 'Unknown error occurred'}</div>
+      </div>
+    );
+  }
+
   let color = '245, 158, 11'; // Moderate = Yellow/Amber
   if (data.overallRisk === 'Low') color = '16, 185, 129'; // Low = Green
   if (data.overallRisk === 'High') color = '239, 68, 68'; // High = Red
@@ -38,11 +47,11 @@ export default function RiskAssessmentWidget() {
       color: 'rgb(226, 232, 240)',
       borderRadius: '24px',
       border: '1px solid rgba(148, 163, 184, 0.1)',
-      maxWidth: '500px',
-      margin: '0 auto',
       textAlign: 'center',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       {/* Background Glow */}
       <div style={{

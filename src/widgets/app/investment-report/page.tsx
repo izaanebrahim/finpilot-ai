@@ -24,6 +24,15 @@ export default function InvestmentReportWidget() {
     );
   }
 
+  if (data.status === 'error') {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center', color: 'rgb(239, 68, 68)', fontFamily: 'system-ui', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Error generating report</div>
+        <div style={{ fontSize: '14px', marginTop: '8px' }}>{(data as any).error || 'Unknown error occurred'}</div>
+      </div>
+    );
+  }
+
   const recColors: Record<string, string> = {
     BUY: '16, 185, 129',
     HOLD: '245, 158, 11',
@@ -39,11 +48,11 @@ export default function InvestmentReportWidget() {
       color: 'rgb(226, 232, 240)',
       borderRadius: '24px',
       border: '1px solid rgba(148, 163, 184, 0.1)',
-      maxWidth: '700px',
-      margin: '0 auto',
       boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       {/* Decorative top gradient */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: `linear-gradient(90deg, transparent, rgb(${accentColor}), transparent)` }} />
@@ -78,9 +87,12 @@ export default function InvestmentReportWidget() {
           background: 'rgba(255, 255, 255, 0.03)',
           padding: '24px',
           borderRadius: '16px',
-          borderLeft: `4px solid rgb(${accentColor})`
+          borderLeft: `4px solid rgb(${accentColor})`,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          minHeight: '100px'
         }}>
-          {data.executiveSummary}
+          {data.executiveSummary || 'No executive summary provided. The orchestrator may not have generated a summary payload for this report.'}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
-import yahooFinance from 'yahoo-finance2';
+import yahooFinancePkg from 'yahoo-finance2';
+const yahooFinance = new (yahooFinancePkg as any)();
 export class FinancialTools {
   @Widget('financial-dashboard')
   @Tool({
