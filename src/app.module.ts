@@ -2,6 +2,7 @@ import { McpApp, Module, ConfigModule } from '@nitrostack/core';
 import { CalculatorModule } from './modules/calculator/calculator.module.js';
 import { MarketDataModule } from './modules/market-data/market-data.module.js';
 import { FinancialModule } from './modules/financials/financials.module.js';
+import { ValuationModule } from './modules/valuation/valuation.module.js';
 import { SystemHealthCheck } from './health/system.health.js';
 
 /**
@@ -27,7 +28,8 @@ import { SystemHealthCheck } from './health/system.health.js';
     ConfigModule.forRoot(),
     CalculatorModule,
     MarketDataModule,
-    FinancialModule
+    FinancialModule,
+    ValuationModule
   ],
   providers: [
     // Health Checks

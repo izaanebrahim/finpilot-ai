@@ -1,6 +1,7 @@
-import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
 
 export class FinancialTools {
+  @Widget('financial-dashboard')
   @Tool({
     name: 'get_financial_statements',
     description: 'Retrieve the income statement, balance sheet, or cash flow statement for a company.',
