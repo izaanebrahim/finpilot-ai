@@ -1,5 +1,7 @@
 import { McpApp, Module, ConfigModule } from '@nitrostack/core';
 import { CalculatorModule } from './modules/calculator/calculator.module.js';
+import { MarketDataModule } from './modules/market-data/market-data.module.js';
+import { FinancialModule } from './modules/financials/financials.module.js';
 import { SystemHealthCheck } from './health/system.health.js';
 
 /**
@@ -11,7 +13,7 @@ import { SystemHealthCheck } from './health/system.health.js';
 @McpApp({
   module: AppModule,
   server: {
-    name: 'calculator-server',
+    name: 'finpilot-mcp',
     version: '1.0.0'
   },
   logging: {
@@ -23,7 +25,9 @@ import { SystemHealthCheck } from './health/system.health.js';
   description: 'Root application module',
   imports: [
     ConfigModule.forRoot(),
-    CalculatorModule
+    CalculatorModule,
+    MarketDataModule,
+    FinancialModule
   ],
   providers: [
     // Health Checks
