@@ -1,6 +1,7 @@
-import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
 
 export class ReportTools {
+  @Widget('investment-report')
   @Tool({
     name: 'generate_investment_report',
     description: 'Aggregates findings into a comprehensive AI investment report.',

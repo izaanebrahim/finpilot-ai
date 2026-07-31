@@ -1,7 +1,8 @@
-import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
 import yahooFinance from 'yahoo-finance2';
 
 export class MarketDataTools {
+  @Widget('stock-price')
   @Tool({
     name: 'get_stock_price',
     description: 'Retrieve the current real-time stock price and historical data for a given ticker symbol.',
@@ -31,6 +32,7 @@ export class MarketDataTools {
     }
   }
 
+  @Widget('market-news')
   @Tool({
     name: 'get_market_news',
     description: 'Retrieve real market news articles for a specific stock.',

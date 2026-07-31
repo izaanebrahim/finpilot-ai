@@ -1,7 +1,8 @@
-import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
 import yahooFinance from 'yahoo-finance2';
 
 export class ValuationTools {
+  @Widget('valuation-model')
   @Tool({
     name: 'run_dcf_valuation',
     description: 'Runs a Discounted Cash Flow (DCF) model to estimate the intrinsic value of a stock using live free cash flows.',
@@ -73,6 +74,7 @@ export class ValuationTools {
     }
   }
 
+  @Widget('risk-assessment')
   @Tool({
     name: 'get_risk_assessment',
     description: 'Assess the live risk profile of a company including beta.',

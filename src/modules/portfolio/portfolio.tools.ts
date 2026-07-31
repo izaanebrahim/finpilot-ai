@@ -1,7 +1,8 @@
-import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
 import yahooFinance from 'yahoo-finance2';
 
 export class PortfolioTools {
+  @Widget('portfolio-diversification')
   @Tool({
     name: 'analyze_portfolio_diversification',
     description: 'Analyze the sector and asset class diversification of a given stock portfolio.',

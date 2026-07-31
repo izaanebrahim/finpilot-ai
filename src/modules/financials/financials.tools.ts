@@ -45,6 +45,7 @@ export class FinancialTools {
     }
   }
 
+  @Widget('financial-ratios')
   @Tool({
     name: 'calculate_financial_ratios',
     description: 'Calculate and retrieve key financial ratios like P/E, Debt-to-Equity, and ROE.',
