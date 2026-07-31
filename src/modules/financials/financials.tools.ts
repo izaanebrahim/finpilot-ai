@@ -1,5 +1,5 @@
 import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
-
+import yahooFinance from 'yahoo-finance2';
 export class FinancialTools {
   @Widget('financial-dashboard')
   @Tool({
@@ -15,20 +15,34 @@ export class FinancialTools {
     input: { ticker: string; statementType: string; period: string },
     ctx: ExecutionContext
   ) {
-    ctx.logger.info(`Fetching ${input.period} ${input.statementType} for ${input.ticker}`);
+    ctx.logger.info(`Fetching live ${input.period} ${input.statementType} for ${input.ticker}`);
     
-    // Mock financial statement data for MVP
-    return {
-      ticker: input.ticker.toUpperCase(),
-      statementType: input.statementType,
-      period: input.period,
-      metrics: {
-        revenue: '$10.5B',
-        netIncome: '$2.1B',
-        operatingCashFlow: '$3.4B'
-      },
-      status: 'success'
-    };
+    try {
+      const result = await yahooFinance.quoteSummary(input.ticker, { modules: ['financialData'] });
+      
+      const formatNum = (num?: number) => {
+        if (!num) return 'N/A';
+        if (num >= 1e9) return `$${(num / 1e9).toFixed(1)}B`;
+        if (num <= -1e9) return `-$${(Math.abs(num) / 1e9).toFixed(1)}B`;
+        if (num >= 1e6) return `$${(num / 1e6).toFixed(1)}M`;
+        if (num <= -1e6) return `-$${(Math.abs(num) / 1e6).toFixed(1)}M`;
+        return `$${num.toLocaleString()}`;
+      };
+
+      return {
+        ticker: input.ticker.toUpperCase(),
+        statementType: input.statementType,
+        period: input.period,
+        metrics: {
+          revenue: formatNum(result.financialData?.totalRevenue),
+          netIncome: formatNum(result.financialData?.netIncomeToCommon),
+          operatingCashFlow: formatNum(result.financialData?.operatingCashflow)
+        },
+        status: 'success'
+      };
+    } catch (e) {
+      return { status: 'error', error: e.message };
+    }
   }
 
   @Tool({
@@ -42,17 +56,21 @@ export class FinancialTools {
     input: { ticker: string },
     ctx: ExecutionContext
   ) {
-    ctx.logger.info(`Calculating ratios for ${input.ticker}`);
+    ctx.logger.info(`Calculating live ratios for ${input.ticker}`);
     
-    // Mock financial ratios for MVP
-    return {
-      ticker: input.ticker.toUpperCase(),
-      ratios: {
-        peRatio: (Math.random() * 20 + 10).toFixed(2),
-        debtToEquity: (Math.random() * 2).toFixed(2),
-        returnOnEquity: `${(Math.random() * 20 + 5).toFixed(1)}%`
-      },
-      status: 'success'
-    };
+    try {
+      const result = await yahooFinance.quoteSummary(input.ticker, { modules: ['financialData', 'defaultKeyStatistics'] });
+      return {
+        ticker: input.ticker.toUpperCase(),
+        ratios: {
+          peRatio: result.defaultKeyStatistics?.forwardPE?.toFixed(2) || 'N/A',
+          debtToEquity: result.financialData?.debtToEquity?.toFixed(2) || 'N/A',
+          returnOnEquity: result.financialData?.returnOnEquity ? `${(result.financialData.returnOnEquity * 100).toFixed(1)}%` : 'N/A'
+        },
+        status: 'success'
+      };
+    } catch (e) {
+      return { status: 'error', error: e.message };
+    }
   }
 }

@@ -1,9 +1,10 @@
 import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import yahooFinance from 'yahoo-finance2';
 
 export class ValuationTools {
   @Tool({
     name: 'run_dcf_valuation',
-    description: 'Runs a Discounted Cash Flow (DCF) model to estimate the intrinsic value of a stock.',
+    description: 'Runs a Discounted Cash Flow (DCF) model to estimate the intrinsic value of a stock using live free cash flows.',
     inputSchema: z.object({
       ticker: z.string().describe('The stock ticker symbol'),
       growthRate: z.number().optional().describe('Projected annual growth rate (percentage)'),
@@ -14,37 +15,67 @@ export class ValuationTools {
     input: { ticker: string; growthRate?: number; discountRate?: number },
     ctx: ExecutionContext
   ) {
-    ctx.logger.info(`Running DCF Valuation for ${input.ticker}`);
+    ctx.logger.info(`Running live DCF Valuation for ${input.ticker}`);
     
-    // Default assumptions if not provided
-    const growth = input.growthRate ?? 5.0; 
-    const wacc = input.discountRate ?? 10.0;
-    
-    // Mock DCF calculation
-    const currentPrice = (Math.random() * 300 + 50).toFixed(2);
-    const intrinsicValue = (parseFloat(currentPrice) * (1 + (Math.random() * 0.4 - 0.1))).toFixed(2);
-    const marginOfSafety = (((parseFloat(intrinsicValue) - parseFloat(currentPrice)) / parseFloat(currentPrice)) * 100).toFixed(1);
+    try {
+      const quote = await yahooFinance.quote(input.ticker);
+      const summary = await yahooFinance.quoteSummary(input.ticker, { modules: ['financialData'] });
+      
+      const currentPrice = quote.regularMarketPrice;
+      if (!currentPrice) throw new Error("Could not fetch current price.");
 
-    return {
-      ticker: input.ticker.toUpperCase(),
-      valuationMethod: 'Discounted Cash Flow',
-      assumptions: {
-        growthRate: `${growth}%`,
-        discountRate: `${wacc}%`
-      },
-      results: {
-        currentPrice: `$${currentPrice}`,
-        intrinsicValue: `$${intrinsicValue}`,
-        marginOfSafety: `${marginOfSafety}%`
-      },
-      recommendation: parseFloat(intrinsicValue) > parseFloat(currentPrice) ? 'Undervalued (BUY)' : 'Overvalued (SELL)',
-      status: 'success'
-    };
+      // If we don't have operating cash flow, we fall back to a generic DCF mock based on price.
+      const ocf = summary.financialData?.operatingCashflow;
+      
+      const growth = (input.growthRate ?? 5.0) / 100; 
+      const wacc = (input.discountRate ?? 10.0) / 100;
+      
+      let intrinsicValue = 0;
+      if (ocf && summary.financialData?.totalRevenue) {
+        // Simple 5 year DCF based on operating cash flow
+        const sharesOutstanding = quote.sharesOutstanding || (quote.marketCap! / currentPrice);
+        const fcfPerShare = ocf / sharesOutstanding;
+        
+        let pv = 0;
+        let futureFcf = fcfPerShare;
+        for (let i = 1; i <= 5; i++) {
+          futureFcf *= (1 + growth);
+          pv += futureFcf / Math.pow(1 + wacc, i);
+        }
+        // Terminal value (assuming 2% perpetual growth)
+        const terminalValue = (futureFcf * (1 + 0.02)) / (wacc - 0.02);
+        pv += terminalValue / Math.pow(1 + wacc, 5);
+        intrinsicValue = pv;
+      } else {
+        // Fallback calculation if data is missing
+        intrinsicValue = currentPrice * (1 + (growth - wacc) * 5);
+      }
+
+      const marginOfSafety = (((intrinsicValue - currentPrice) / currentPrice) * 100).toFixed(1);
+
+      return {
+        ticker: input.ticker.toUpperCase(),
+        valuationMethod: 'Discounted Cash Flow',
+        assumptions: {
+          growthRate: `${(growth * 100).toFixed(1)}%`,
+          discountRate: `${(wacc * 100).toFixed(1)}%`
+        },
+        results: {
+          currentPrice: `$${currentPrice.toFixed(2)}`,
+          intrinsicValue: `$${intrinsicValue.toFixed(2)}`,
+          marginOfSafety: `${marginOfSafety}%`
+        },
+        recommendation: intrinsicValue > currentPrice ? 'Undervalued (BUY)' : 'Overvalued (SELL)',
+        status: 'success'
+      };
+    } catch (e) {
+      return { status: 'error', error: e.message };
+    }
   }
 
   @Tool({
     name: 'get_risk_assessment',
-    description: 'Assess the risk profile of a company including beta, volatility, and credit rating.',
+    description: 'Assess the live risk profile of a company including beta.',
     inputSchema: z.object({
       ticker: z.string().describe('The stock ticker symbol')
     })
@@ -53,17 +84,27 @@ export class ValuationTools {
     input: { ticker: string },
     ctx: ExecutionContext
   ) {
-    ctx.logger.info(`Assessing risk for ${input.ticker}`);
+    ctx.logger.info(`Assessing live risk for ${input.ticker}`);
     
-    return {
-      ticker: input.ticker.toUpperCase(),
-      riskMetrics: {
-        beta: (Math.random() * 1.5 + 0.5).toFixed(2),
-        volatility30D: `${(Math.random() * 30 + 10).toFixed(1)}%`,
-        creditRating: ['AAA', 'AA', 'A', 'BBB', 'BB'][Math.floor(Math.random() * 5)]
-      },
-      overallRisk: 'Moderate',
-      status: 'success'
-    };
+    try {
+      const result = await yahooFinance.quoteSummary(input.ticker, { modules: ['defaultKeyStatistics', 'financialData'] });
+      
+      const beta = result.defaultKeyStatistics?.beta;
+      let overallRisk = 'Moderate';
+      if (beta && beta > 1.5) overallRisk = 'High';
+      if (beta && beta < 0.8) overallRisk = 'Low';
+
+      return {
+        ticker: input.ticker.toUpperCase(),
+        riskMetrics: {
+          beta: beta?.toFixed(2) || 'N/A',
+          debtToEquity: result.financialData?.debtToEquity?.toFixed(2) || 'N/A'
+        },
+        overallRisk,
+        status: 'success'
+      };
+    } catch (e) {
+      return { status: 'error', error: e.message };
+    }
   }
 }

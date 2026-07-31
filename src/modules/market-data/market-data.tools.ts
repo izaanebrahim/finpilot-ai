@@ -1,9 +1,10 @@
 import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import yahooFinance from 'yahoo-finance2';
 
 export class MarketDataTools {
   @Tool({
     name: 'get_stock_price',
-    description: 'Retrieve the current stock price and historical data for a given ticker symbol.',
+    description: 'Retrieve the current real-time stock price and historical data for a given ticker symbol.',
     inputSchema: z.object({
       ticker: z.string().describe('The stock ticker symbol (e.g., AAPL, MSFT)'),
       period: z.enum(['1D', '1W', '1M', '1Y']).default('1D').describe('The historical time period to fetch')
@@ -13,42 +14,48 @@ export class MarketDataTools {
     input: { ticker: string; period: string },
     ctx: ExecutionContext
   ) {
-    ctx.logger.info(`Fetching market data for ${input.ticker}`);
+    ctx.logger.info(`Fetching live market data for ${input.ticker}`);
     
-    // TODO: Integrate with a real financial API like AlphaVantage or Yahoo Finance.
-    // For now, returning mock data for the hackathon MVP.
-    const mockPrice = (Math.random() * 500 + 50).toFixed(2);
-    
-    return {
-      ticker: input.ticker.toUpperCase(),
-      currentPrice: parseFloat(mockPrice),
-      currency: 'USD',
-      period: input.period,
-      status: 'success',
-      data: `Simulated price data for ${input.ticker} over ${input.period}.`
-    };
+    try {
+      const quote = await yahooFinance.quote(input.ticker);
+      return {
+        ticker: input.ticker.toUpperCase(),
+        currentPrice: quote.regularMarketPrice,
+        currency: quote.currency,
+        period: input.period,
+        status: 'success',
+        data: `Live price data for ${input.ticker}: $${quote.regularMarketPrice} ${quote.currency}`
+      };
+    } catch (e) {
+      return { status: 'error', error: e.message };
+    }
   }
 
   @Tool({
     name: 'get_market_news',
-    description: 'Retrieve recent market news articles for a specific stock or general market.',
+    description: 'Retrieve real market news articles for a specific stock.',
     inputSchema: z.object({
-      ticker: z.string().optional().describe('The stock ticker symbol to filter news by')
+      ticker: z.string().describe('The stock ticker symbol to filter news by')
     })
   })
   async getMarketNews(
-    input: { ticker?: string },
+    input: { ticker: string },
     ctx: ExecutionContext
   ) {
-    const topic = input.ticker ? input.ticker.toUpperCase() : 'General Market';
-    ctx.logger.info(`Fetching news for ${topic}`);
+    ctx.logger.info(`Fetching live news for ${input.ticker}`);
     
-    return {
-      topic,
-      articles: [
-        { title: `${topic} sees unexpected surge in trading volume`, source: 'Financial Times' },
-        { title: `Analysts predict stable quarter for ${topic}`, source: 'Bloomberg' }
-      ]
-    };
+    try {
+      const result = await yahooFinance.search(input.ticker);
+      return {
+        topic: input.ticker.toUpperCase(),
+        articles: result.news.slice(0, 5).map((news: any) => ({
+          title: news.title,
+          source: news.publisher,
+          link: news.link
+        }))
+      };
+    } catch (e) {
+      return { status: 'error', error: e.message };
+    }
   }
 }
