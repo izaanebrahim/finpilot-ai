@@ -70,7 +70,7 @@ export class ValuationTools {
         recommendation: intrinsicValue > currentPrice ? 'Undervalued (BUY)' : 'Overvalued (SELL)',
         status: 'success'
       };
-    } catch (e) {
+    } catch (e: any) {
       return { status: 'error', error: e.message };
     }
   }
@@ -106,7 +106,7 @@ export class ValuationTools {
         overallRisk,
         status: 'success'
       };
-    } catch (e) {
+    } catch (e: any) {
       return { status: 'error', error: e.message };
     }
   }

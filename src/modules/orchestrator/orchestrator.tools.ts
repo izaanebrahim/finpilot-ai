@@ -1,5 +1,4 @@
 import { ToolDecorator as Tool, ExecutionContext, z, Widget } from '@nitrostack/core';
-import { FinPilotAgent } from './orchestrator.agent';
 
 export class OrchestratorTools {
   @Widget('orchestrator-plan')

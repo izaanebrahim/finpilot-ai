@@ -57,7 +57,7 @@ export class PortfolioTools {
         holdingDetails,
         status: 'success'
       };
-    } catch (e) {
+    } catch (e: any) {
       return { status: 'error', error: e.message };
     }
   }

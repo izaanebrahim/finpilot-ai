@@ -28,7 +28,7 @@ export class MarketDataTools {
         status: 'success',
         data: `Live price data for ${input.ticker}: $${quote.regularMarketPrice} ${quote.currency}`
       };
-    } catch (e) {
+    } catch (e: any) {
       return { status: 'error', error: e.message };
     }
   }
@@ -57,7 +57,7 @@ export class MarketDataTools {
           link: news.link
         }))
       };
-    } catch (e) {
+    } catch (e: any) {
       return { status: 'error', error: e.message };
     }
   }
