@@ -4,7 +4,7 @@
 
 Ask your assistant *"Is RELIANCE.NS a good buy right now?"* and FinPilot gives it the tools to pull live prices and financial statements, calculate ratios, run a DCF valuation, check portfolio diversification and risk, and compile everything into an investment report — rendered as interactive charts and cards directly inside the chat.
 
-Built with TypeScript on [NitroStack](https://nitrostack.ai), with market data from Yahoo Finance.
+Built with TypeScript on [NitroStack](https://nitrostack.ai), with market data from Yahoo Finance. **Runner-up at the NitroStack MCP Hackathon 2026.**
 
 ---
 
