@@ -1,89 +1,99 @@
-# FinPilot AI: The Autonomous Investment Banking Agent with Rich MCP UI
+# FinPilot AI
 
-> FinPilot AI is a next-generation Model Context Protocol (MCP) server that transforms standard LLMs into autonomous investment bankers.
+**An MCP server that turns any MCP-compatible AI assistant into an equity research analyst.**
 
-![Model Context Protocol](https://img.shields.io/badge/Model%20Context%20Protocol-MCP-blue) ![Built with Nitrostack](https://img.shields.io/badge/Built%20with-Nitrostack-0A66FF) ![Status](https://img.shields.io/badge/status-live-brightgreen)
+Ask your assistant *"Is RELIANCE.NS a good buy right now?"* and FinPilot gives it the tools to pull live prices and financial statements, calculate ratios, run a DCF valuation, check portfolio diversification and risk, and compile everything into an investment report — rendered as interactive charts and cards directly inside the chat.
 
-**FinPilot AI: The Autonomous Investment Banking Agent with Rich MCP UI** is an [MCP (Model Context Protocol)](https://nitrostack.ai) server that extends AI assistants — like Claude, Cursor, and any MCP-compatible client — with new, real-world capabilities. It is built and deployed on [Nitrostack](https://nitrostack.ai), the fastest way to build, deploy, and share MCP apps.
+Built with TypeScript on [NitroStack](https://nitrostack.ai), with market data from Yahoo Finance.
 
-## Table of Contents
-
-- [Overview](#overview)
-- [What is MCP?](#what-is-mcp)
-- [Features](#features)
-- [Live Demo](#live-demo)
-- [Getting Started](#getting-started)
-- [Connect to an MCP Client](#connect-to-an-mcp-client)
-- [Deploy Your Own MCP App](#deploy-your-own-mcp-app)
-- [Explore More MCP Apps](#explore-more-mcp-apps)
-- [FAQ](#faq)
-- [Keywords](#keywords)
-- [License](#license)
-
-## Overview
-
-FinPilot AI is a next-generation Model Context Protocol (MCP) server that transforms standard LLMs into autonomous investment bankers. Unlike traditional financial data plugins that simply return raw JSON or text, FinPilot features a Multi-Agent Orchestrator that coordinates specialized sub-agents to fetch live market data, calculate fundamental ratios, run Discounted Cash Flow (DCF) valuations, and assess portfolio diversification.
-
-What truly sets FinPilot apart is its Server-Driven UI architecture. Using NitroStack's widget system, FinPilot dynamically renders stunning, interactive, glassmorphism React micro-frontends directly inside the chat interface. Furthermore, FinPilot bridges the gap between analysis and action by automatically compiling its findings into executive reports and securely emailing them to stakeholders via a custom SMTP integration.
-
-## What is MCP?
-
-The **Model Context Protocol (MCP)** is an open standard that lets AI assistants securely connect to external tools, data sources, and services. Instead of being limited to what it was trained on, an AI model can call **MCP servers** to fetch live data, run actions, and integrate with real systems.
-
-This project is one such MCP server. Learn more about building and shipping MCP apps at [nitrostack.ai](https://nitrostack.ai).
+---
 
 ## Features
 
-- 🔌 **MCP-native** — works with any MCP-compatible client (Claude, Cursor, and more)
-- 🛠️ **Tools, resources & prompts** — exposes structured capabilities to AI agents
-- ⚡ **Deployed on Nitrostack** — reliable, hosted, and instantly shareable
-- 🔐 **Secure by design** — secrets stay in environment variables, never in code
-- 🧩 **Composable** — combine with other MCP apps to build powerful AI workflows
+- **Live market data** — real-time quotes, price history and recent news for any ticker, including NSE/BSE symbols such as `TCS.NS`.
+- **Fundamental analysis** — income statement, balance sheet and cash flow retrieval, plus key ratios (P/E, Debt-to-Equity, ROE).
+- **DCF valuation** — estimates intrinsic value from live free cash flow, with adjustable growth and discount (WACC) rates.
+- **Risk & portfolio analysis** — beta-based risk profile and sector / asset-class diversification for a set of holdings.
+- **Multi-step orchestration** — an orchestration tool plans a full analysis across the market data, financials, valuation and report modules.
+- **In-chat UI widgets** — results render as interactive React components (dashboards, charts, valuation models) instead of raw JSON.
+- **Emailed reports** — compiles findings into an investment report and can send it to any email address over SMTP.
 
-## Live Demo
+## Tools
 
-🚀 **Live MCP endpoint:** https://finpilot-6a6d8635-rushd-srmist.app.nitrocloud.ai/mcp
+| Module | Tool | What it does |
+|---|---|---|
+| Market Data | `get_stock_price` | Real-time price and historical data for a ticker |
+| Market Data | `get_market_news` | Latest news articles for a stock |
+| Financials | `get_financial_statements` | Income statement, balance sheet or cash flow |
+| Financials | `calculate_financial_ratios` | P/E, Debt-to-Equity, ROE and more |
+| Valuation | `run_dcf_valuation` | Discounted Cash Flow intrinsic value estimate |
+| Valuation | `get_risk_assessment` | Live risk profile, including beta |
+| Portfolio | `analyze_portfolio_diversification` | Sector and asset-class mix of a portfolio |
+| Orchestrator | `orchestrate_financial_analysis` | Plans a multi-step analysis across modules |
+| Report | `generate_investment_report` | Aggregates findings into one report |
+| Report | `email_investment_report` | Emails the report to a given address |
 
-Point your MCP client at the endpoint above to try it instantly. Prefer a hosted setup? Deploy your own in minutes on [Nitrostack](https://nitrostack.ai).
+Each tool is paired with a widget in `src/widgets/app/` (for example `valuation-model`, `financial-dashboard`, `portfolio-diversification`), so the assistant shows a visual result alongside its answer.
 
-## Getting Started
+## How it works
 
-### Prerequisites
-
-- Node.js 18+ (or your project runtime)
-- An MCP-compatible client (Claude Desktop, Cursor, etc.)
-
-### Installation
-
-```bash
-git clone https://github.com/ShahzaadAhmed/MCP_project.git
-cd MCP_project
-npm install
+```
+ AI assistant (any MCP client)
+          │  MCP (stdio / HTTP)
+          ▼
+ ┌─────────────────────────── FinPilot MCP server ───────────────────────────┐
+ │  Orchestrator ──► Market Data ──► Financials ──► Valuation ──► Report     │
+ │                                        │                         │        │
+ │                                  Yahoo Finance              SMTP email    │
+ │                                                                           │
+ │  Widgets (Next.js / React) rendered inside the chat via server-driven UI  │
+ └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Configuration
+The server is organised into feature modules (`src/modules/*`), each exposing its tools through NitroStack decorators with [Zod](https://zod.dev) input schemas. The root module in `src/app.module.ts` registers them all, along with a health check.
 
-Copy the example environment file and add your own values:
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Language | TypeScript (Node.js) |
+| MCP framework | NitroStack (`@nitrostack/core`, `@nitrostack/cli`) |
+| Widgets | Next.js, React |
+| Market data | `yahoo-finance2` |
+| Validation | Zod |
+| Email | Nodemailer (Gmail SMTP) |
+
+## Getting started
+
+**Prerequisites:** Node.js 18+ and npm.
 
 ```bash
+git clone https://github.com/izaanebrahim/finpilot-ai.git
+cd finpilot-ai
+npm run install:all      # installs server and widget dependencies
 cp .env.example .env
+npm run dev              # starts the MCP server in development mode
 ```
 
-Ensure you set the following environment variables if you want to enable the email-sending features:
+To enable emailed reports, add a Gmail address and an [app password](https://support.google.com/accounts/answer/185833) to `.env`:
+
 ```env
-GMAIL_USER=your_gmail_address
-GMAIL_APP_PASSWORD=your_16_character_app_password
+GMAIL_USER=you@gmail.com
+GMAIL_APP_PASSWORD=your-16-character-app-password
 ```
 
-### Run
+Without these, every other tool still works; the email tool simply reports that email is disabled.
+
+### Production build
 
 ```bash
-npm run start
+npm run build
+npm run start:prod
 ```
 
-## Connect to an MCP Client
+## Connect it to an AI assistant
 
-Add this server to your MCP client configuration. A typical entry looks like:
+Add FinPilot to your MCP client's configuration. To use the hosted server:
 
 ```json
 {
@@ -95,45 +105,39 @@ Add this server to your MCP client configuration. A typical entry looks like:
 }
 ```
 
-Restart your client and the tools from this MCP server will be available to your AI assistant.
+Restart the client and the FinPilot tools become available. Try prompts like:
 
-## Deploy Your Own MCP App
+- *"Run a DCF on INFY.NS with 8% growth and a 11% discount rate."*
+- *"Compare the financial ratios of HDFCBANK.NS and ICICIBANK.NS."*
+- *"How diversified is a portfolio of TCS.NS, RELIANCE.NS, ITC.NS and SUNPHARMA.NS?"*
+- *"Write an investment report on TATAMOTORS.NS and email it to me."*
 
-Want to build and ship an MCP server like this one? **[Nitrostack](https://nitrostack.ai)** lets you create, deploy, and host MCP apps in minutes — no infrastructure to manage.
+## Project structure
 
-👉 **Start building:** [https://nitrostack.ai](https://nitrostack.ai)
+```
+src/
+├── app.module.ts          # Root module — registers all feature modules
+├── index.ts               # Server entry point
+├── health/                # Health check
+├── modules/
+│   ├── market-data/       # Prices, history, news
+│   ├── financials/        # Statements and ratios
+│   ├── valuation/         # DCF and risk assessment
+│   ├── portfolio/         # Diversification analysis
+│   ├── orchestrator/      # Multi-step analysis planning
+│   ├── report/            # Report generation and email
+│   └── calculator/        # Utility calculator
+└── widgets/               # Next.js app with one page per in-chat widget
+```
 
-## Explore More MCP Apps
+## Disclaimer
 
-- 🌙 Discover and share MCP projects with the community on [r/mcptothemoon](https://www.reddit.com/r/mcptothemoon/)
-- 🧰 Browse a growing catalog of MCP apps on [Nitrostack](https://nitrostack.ai/apps)
+FinPilot is a research and learning project. Its output is not investment advice; always do your own research before making financial decisions.
 
-## FAQ
+## Team
 
-### What is an MCP server?
-
-An MCP server implements the Model Context Protocol to expose tools, resources, and prompts that AI assistants can call. It lets an AI model take real actions and access live data.
-
-### What does FinPilot AI: The Autonomous Investment Banking Agent with Rich MCP UI do?
-
-FinPilot AI is a next-generation Model Context Protocol (MCP) server that transforms standard LLMs into autonomous investment bankers.
-
-### Which AI clients does this work with?
-
-Any MCP-compatible client, including Claude Desktop and Cursor. New clients are adding MCP support regularly.
-
-### How do I deploy my own MCP app?
-
-Use [Nitrostack](https://nitrostack.ai) to build, deploy, and host MCP apps without managing infrastructure.
-
-## Keywords
-
-`BFSI & FinTech` · `FinPilot AI: The Autonomous Investment Banking Agent with Rich MCP UI` · `MCP` · `Model Context Protocol` · `MCP server` · `MCP app` · `AI tools` · `AI agents` · `LLM tools` · `Claude MCP` · `Nitrostack` · `deploy MCP server` · `build MCP app`
+Built by [Izaan Ebrahim](https://github.com/izaanebrahim) and [Shahzaad Ahmed](https://github.com/ShahzaadAhmed). Originally developed in [ShahzaadAhmed/MCP_project](https://github.com/ShahzaadAhmed/MCP_project).
 
 ## License
 
-MIT © 2026
-
----
-
-Built with ❤️ using the Model Context Protocol on [Nitrostack](https://nitrostack.ai). Share your MCP app on [r/mcptothemoon](https://www.reddit.com/r/mcptothemoon/).
+MIT
